@@ -2,11 +2,11 @@ import {
   Body,
   Controller,
   Delete,
-  Get, Logger,
+  Get,
   Param,
   ParseIntPipe,
   Patch,
-  Post,
+  Post, UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -15,8 +15,10 @@ import { BoardStatus } from './board-status.enum';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe';
 import { Board } from './board.entity';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('boards')
+@UseGuards(AuthGuard())
 export class BoardsController {
   // spring version
   // boardsService: BoardsService;
