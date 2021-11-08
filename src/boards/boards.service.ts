@@ -4,6 +4,8 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardRepository } from './board.repository';
 import { Board } from './board.entity';
+import { User } from '../auth/user.entity';
+
 // import { v1 as uuid } from 'uuid';
 
 @Injectable()
@@ -55,24 +57,30 @@ export class BoardsService {
   /**
    * 전체 목록 가져오기
    */
-  getAllBoards(): Promise<Board[]> {
-    return this.boardRepository.getAllBoards();
+  async getAllBoards(user: User): Promise<Board[]> {
+    const query = this.boardRepository.createQueryBuilder('board');
+
+    // 자신의 게시물만 가져오기
+    query.where('board.userId = :userId', { userId: user.id });
+    const board = await query.getMany();
+
+    return board;
   }
 
   /**
    * 생성
    * @param createBoardDto
    */
-  createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
-    return this.boardRepository.createBoard(createBoardDto);
+  createBoard(createBoardDto: CreateBoardDto, user: User): Promise<Board> {
+    return this.boardRepository.createBoard(createBoardDto, user);
   }
 
   /**
    * 찾기
    * @param id
    */
-  getBoardById(id: number): Promise<Board> {
-    const found = this.boardRepository.getBoardById(id);
+  async getBoardById(id: number): Promise<Board> {
+    const found = this.boardRepository.findOne(id);
 
     if (!found) {
       throw new NotFoundException(`Can't find Board with id ${id}`);
@@ -87,20 +95,21 @@ export class BoardsService {
    * @param status
    */
   async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
-      const board = await this.getBoardById(id);
-      board.status = status;
+    const board = await this.getBoardById(id);
+    board.status = status;
 
-      await this.boardRepository.save(board);
+    await this.boardRepository.save(board);
 
-      return board;
-    }
+    return board;
+  }
 
   /**
    * 삭제
    * @param id
+   * @param user
    */
-  async deleteBoard(id: number): Promise<void> {
-    const result = await this.boardRepository.delete(id);
+  async deleteBoard(id: number, user: User): Promise<void> {
+    const result = await this.boardRepository.delete({ id, user });
 
     // 예외처리
     if (result.affected === 0) {

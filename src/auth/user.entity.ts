@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Board } from '../boards/board.entity';
 
 @Entity()
 // @Unique(['username']) // 유니크값 처리
@@ -11,4 +12,7 @@ export class User extends BaseEntity {
 
   @Column()
   password: string;
+
+  @OneToMany(type => Board, board => board.user, { eager: true })
+  boards: Board[];
 }
