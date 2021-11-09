@@ -1,0 +1,12 @@
+server:
+  port: 3000
+
+# dataBase
+db:
+  type: 'postgres'
+  port: 5432
+  database: 'board-app'
+
+jwt:
+  # 유효시간
+  expiresIn: 60 * 60
